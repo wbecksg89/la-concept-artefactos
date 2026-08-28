@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LA CONCEPT · Tablero del proyecto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  h1,h2{font-family:'Playfair Display',Georgia,serif}
+  :root{
+    --navy:#1a1512; --navy2:#2c2419; --accent:#a9843f; --accent2:#c9a66b;
+    --ink:#23201c; --muted:#7a7267; --bg:#f4f0e8; --card:#fff; --line:#e8e1d4;
+    --ok:#12a150; --okbg:#e6f7ed; --wip:#e08a00; --wipbg:#fdf1dc; --pend:#7a8699; --pendbg:#eef1f6;
+    --shadow:0 6px 22px rgba(40,30,15,.07); --wire:#dbcfbb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  svg{display:block}
+  .tech-only{display:none} body.tech .tech-only{display:block}
+  .ejec-note{display:block} body.tech .ejec-note{display:none}
+
+  header{background:radial-gradient(1200px 400px at 15% -20%,#3a2f22 0%,var(--navy) 60%);color:#fff;padding:38px 0 32px;border-bottom:2px solid var(--accent2)}
+  .wordmark{font-size:16px;font-weight:800;letter-spacing:5px;text-transform:uppercase;color:var(--accent2)}
+  .eyebrow{font-size:11.5px;letter-spacing:2px;text-transform:uppercase;opacity:.6;margin-top:3px}
+  h1{margin:10px 0 10px;font-size:34px;font-weight:800;letter-spacing:-.3px;line-height:1.12}
+  .lede{opacity:.9;font-size:15px;max-width:660px}
+  .hero-row{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-top:20px}
+  .pill{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:9px 15px;font-weight:650;font-size:13.5px}
+  .pill .dot{width:9px;height:9px;border-radius:50%;background:#ffd24a;box-shadow:0 0 0 4px rgba(255,210,74,.25)}
+  .prog{flex:1;min-width:200px}
+  .prog .lbl{font-size:12px;opacity:.85;display:flex;justify-content:space-between;margin-bottom:6px}
+  .bar{height:9px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden}
+  .bar>i{display:block;height:100%;width:80%;background:linear-gradient(90deg,#e6c884,#c9a66b)}
+  .switch{margin-left:auto;display:inline-flex;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px}
+  .switch button{border:0;background:transparent;color:#fff;opacity:.7;font-weight:650;font-size:13px;padding:7px 14px;border-radius:999px;cursor:pointer}
+  .switch button.on{background:#fff;color:var(--navy);opacity:1}
+  /* contraste visual: problema (tensión) vs valor (positivo) */
+  .s-prob{background:#f7f3ee}
+  .s-prob .vcard{border-left:3px solid #cf9b7d}
+  .s-val .vcard{border-left:3px solid var(--accent2)}
+  /* listas de inteligencia: más aireadas y con viñeta de marca */
+  .intel-list{margin:10px 0 0;padding-left:18px;font-size:12.8px;color:#5a6473;line-height:1.85}
+  .intel-list li{margin:3px 0}
+  .intel-list li::marker{color:var(--accent2)}
+
+  section{padding:32px 0}
+  .kicker{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0 0 4px}
+  h2{margin:0 0 6px;font-size:21px;font-weight:720;color:var(--navy)}
+  .h2sub{color:var(--muted);font-size:14px;margin:0 0 20px}
+
+  /* journey */
+  .journey{display:flex;align-items:flex-start;gap:0}
+  .node{flex:1;text-align:center;position:relative;padding:0 6px;background:none;border:0;cursor:pointer;font-family:inherit}
+  .node .ico{width:64px;height:64px;border-radius:20px;margin:0 auto 11px;display:flex;align-items:center;justify-content:center;background:linear-gradient(140deg,#cabfa8,#d8ccb4);box-shadow:0 8px 16px rgba(120,95,50,.16);transition:.18s;position:relative}
+  .node .ico svg{width:29px;height:29px;stroke:#fff;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .node .st{position:absolute;right:-3px;top:-3px;width:16px;height:16px;border-radius:50%;border:2.5px solid #fff}
+  .st.ok{background:var(--ok)} .st.wip{background:var(--wip)} .st.pend{background:var(--pend)}
+  .node h3{margin:0 0 3px;font-size:14.5px;color:var(--navy)}
+  .node p{margin:0;font-size:12.4px;color:var(--muted)}
+  .node.active .ico,.node:hover .ico{background:linear-gradient(140deg,var(--accent),var(--accent2));box-shadow:0 12px 22px rgba(59,130,246,.32);transform:translateY(-2px)}
+  .node.active h3{color:var(--accent)}
+  .node::before{content:"";position:absolute;top:32px;left:-50%;width:100%;height:3px;background:var(--wire);z-index:-1}
+  .node:first-child::before{display:none}
+  @media(max-width:760px){.journey{flex-direction:column;gap:12px}.node{display:flex;align-items:center;text-align:left;gap:14px;padding:0}.node .ico{margin:0}.node::before{top:-12px;left:32px;width:3px;height:12px}}
+  .hint{text-align:center;color:var(--muted);font-size:12.5px;margin-top:14px}
+
+  /* detail */
+  .detail{margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+  .dhead{display:flex;align-items:center;gap:15px;padding:20px 24px;background:linear-gradient(120deg,#faf6ee,#f3ecde);border-bottom:1px solid var(--line)}
+  .dhead .di{width:52px;height:52px;border-radius:15px;background:linear-gradient(140deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .dhead .di svg{width:26px;height:26px;stroke:#fff;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .dhead h3{margin:0;font-size:18px;color:var(--navy)} .dhead p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+  .dhead .stag{margin-left:auto;font-size:11.5px;font-weight:700;padding:5px 13px;border-radius:999px}
+  .stag.ok{background:var(--okbg);color:var(--ok)} .stag.wip{background:var(--wipbg);color:var(--wip)} .stag.pend{background:var(--pendbg);color:var(--pend)}
+  .dbody{display:grid;grid-template-columns:1fr 1fr}@media(max-width:640px){.dbody{grid-template-columns:1fr}}
+  .dcol{padding:18px 24px} .dcol+.dcol{border-left:1px solid var(--line)}
+  @media(max-width:640px){.dcol+.dcol{border-left:0;border-top:1px solid var(--line)}}
+  .dcol h4{margin:0 0 10px;font-size:12.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+  .dcol li{list-style:none;display:flex;gap:9px;align-items:flex-start;font-size:13.6px;margin:7px 0;color:#334155}
+  .dcol li svg{width:16px;height:16px;flex-shrink:0;margin-top:2px;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .dcol.done li svg{stroke:var(--ok)} .dcol.todo li svg{stroke:var(--pend)}
+  .comp{padding:14px 24px 20px;border-top:1px dashed var(--line)}
+  .comp h4{margin:0 0 8px;font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+  .chip{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;background:#f1f5fb;border:1px solid var(--line);color:#334155;border-radius:7px;padding:4px 9px;margin:3px 4px 0 0}
+
+  /* report branch */
+  .branch{margin-top:8px}
+  .bparent{text-align:center}
+  .bchip{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-weight:650;font-size:13.5px;padding:9px 16px;border-radius:12px}
+  .bchip svg{width:17px;height:17px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .trunk{width:3px;height:22px;background:var(--wire);margin:0 auto}
+  .rcards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;position:relative;padding-top:20px;max-width:720px;margin:0 auto}
+  .rcards::before{content:"";position:absolute;top:0;left:25%;right:25%;height:3px;background:var(--wire)}
+  .rcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);position:relative;transition:transform .15s,box-shadow .15s}
+  .rcard:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(40,30,15,.11)}
+  .rcard::before{content:"";position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:3px;height:20px;background:var(--wire)}
+  .rcard .ric{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:11px}
+  .rcard .ric svg{width:22px;height:22px;stroke:#fff;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .rcard h4{margin:0 0 3px;font-size:15px;color:var(--navy)}
+  .rcard .tagm{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;margin-bottom:8px}
+  .rcard p{margin:0 0 8px;font-size:12.8px;color:var(--muted)}
+  .rcard ul{margin:8px 0 0;padding:0;list-style:none;border-top:1px dashed var(--line);padding-top:8px}
+  .rcard ul li{font-size:12.4px;color:#475569;padding:2.5px 0 2.5px 14px;position:relative}
+  .rcard ul li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  @media(max-width:720px){.rcards{grid-template-columns:1fr;padding-top:0}.rcards::before{display:none}.rcard::before{display:none}.trunk{display:none}}
+
+  /* DFD (Data Flow Diagram) */
+  .dfd-legends{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:16px}
+  .lgset{display:flex;gap:15px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+  .lgset b{color:var(--navy);font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;align-self:center;margin-right:2px}
+  .lgi{display:inline-flex;align-items:center;gap:7px}
+  .sym{width:24px;height:16px;flex-shrink:0}
+  .sym.ent{border:1.6px solid #9aa8bf;border-radius:4px;background:#f1f5fb}
+  .sym.proc{border-radius:999px;background:linear-gradient(140deg,var(--accent),var(--accent2))}
+  .sym.store{border:1.6px solid #9db4d8;border-left:5px solid var(--accent);border-radius:3px;background:#eef4ff}
+  .sym.flow{position:relative;height:2px;background:var(--accent);width:24px}
+  .sym.flow::after{content:"";position:absolute;right:-1px;top:-3px;border-left:6px solid var(--accent);border-top:4px solid transparent;border-bottom:4px solid transparent}
+  .laydot{width:13px;height:13px;border-radius:3px;display:inline-block}
+  .lay-b{background:#c98a4e}.lay-s{background:#8aa0bf}.lay-g{background:#d4af37}
+
+  .dfd{display:flex;align-items:flex-start;gap:4px;overflow-x:auto;padding:8px 2px 6px}
+  .dnode{flex:0 0 116px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px}
+  .dnode .b{width:62px;height:62px;display:flex;align-items:center;justify-content:center}
+  .dnode .b svg{width:25px;height:25px;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .dnode.proc .b{border-radius:18px;background:linear-gradient(140deg,var(--accent),var(--accent2));box-shadow:0 8px 16px rgba(59,130,246,.22)}
+  .dnode.proc .b svg{stroke:#fff}
+  .dnode.ent .b{border:2px solid #9aa8bf;border-radius:9px;background:#f1f5fb}
+  .dnode.ent .b svg{stroke:#5b6b84}
+  .dnode.store .b{border:2px solid #9db4d8;border-left:6px solid var(--accent);border-radius:7px;background:#eef4ff}
+  .dnode.store .b svg{stroke:var(--accent)}
+  .dnode .nm{font-size:12px;font-weight:650;color:var(--navy);line-height:1.2}
+  .dnode .sm{font-size:10px;color:var(--muted);line-height:1.25}
+  .dnode .lay{width:24px;height:4px;border-radius:2px}
+  .arw2{flex:0 0 auto;align-self:flex-start;margin-top:24px;color:#9db4d8;font-size:20px;font-weight:700}
+  .dfd-notes{margin-top:14px;display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--muted)}
+  .dfd-notes b{color:var(--navy)}
+  .mermaid-wrap{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+  .dfd-tools{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .dfd-tools button{border:1px solid var(--line);background:#f4f7fc;color:var(--navy);font-weight:650;font-size:13px;padding:7px 13px;border-radius:9px;cursor:pointer}
+  .dfd-tools button:hover{background:#e8eefb}
+  .dfd-scroll{overflow:auto;max-height:80vh;border-radius:10px;background:#fcfdff}
+  #dfdInner{transform-origin:0 0;transition:transform .12s;width:max-content;padding:6px}
+  .mermaid{min-width:660px}
+  .mermaid-wrap:fullscreen{padding:22px;overflow:auto;background:var(--card)}
+  .mermaid-wrap:fullscreen .dfd-scroll{max-height:none}
+  .mermaid-wrap.simple{padding:16px;overflow-x:auto}
+  .dfd-title{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;background:linear-gradient(120deg,#1a1512,#2c2419);color:#fff;border-radius:12px;padding:12px 18px;margin-bottom:14px;font-size:12.5px;border-left:3px solid var(--accent2)}
+  .dfd-title b{font-size:14.5px}.dfd-title span{opacity:.85}
+  .dfd-sub{font-size:13.5px;font-weight:700;color:var(--navy);margin:20px 0 10px;display:flex;align-items:center;gap:9px}
+  .dfd-sub .bde{font-size:10.5px;font-weight:800;letter-spacing:.5px;color:#fff;background:var(--accent);border-radius:7px;padding:3px 9px}
+  .leg2{display:flex;flex-wrap:wrap;gap:9px 16px;background:#f7f9fd;border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin-bottom:8px}
+  .leg2 .li{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:#475569}
+  .leg2 .sw{width:22px;height:15px;border-radius:4px;flex-shrink:0}
+  .sw.ent{background:#eef2f9;border:1.6px solid #8593ab}
+  .sw.proc{background:#dbe9ff;border:1.6px solid #2563eb}
+  .sw.store{background:#e7f0ff;border:1.6px solid #3b82f6;border-left-width:5px}
+  .sw.mart{background:#eaf7ee;border:1.6px solid #12a150;border-left-width:5px}
+  .sw.out{background:#fff3d6;border:1.6px solid #c99a1e}
+  .sw.trig{background:#f3e8ff;border:1.6px solid #7c3aed}
+  .sw.gate{background:#fde9c8;border:1.6px solid #d97706;transform:skewX(-12deg)}
+  .sw.offline{background:#f3f4f7;border:1.6px dashed #9aa8bf}
+  .sw.plan{background:#fff7ed;border:1.6px dashed #ea9a3c}
+  .node-info{margin-top:14px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:15px 17px;font-size:13.6px;color:#334155;min-height:54px}
+  .node-info .ni-hint{color:var(--muted)}
+  .ni-head{display:flex;align-items:center;gap:11px;margin-bottom:7px;flex-wrap:wrap}
+  .ni-head b{font-size:15.5px;color:var(--navy)}
+  .ni-tipo{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:999px}
+  .ni-tipo.proc{background:#dbe9ff;color:#1d4ed8}.ni-tipo.store{background:#e7f0ff;color:#2563eb}
+  .ni-tipo.ent{background:#eef2f9;color:#475569}.ni-tipo.mart{background:#eaf7ee;color:#12a150}
+  .ni-tipo.out{background:#fff3d6;color:#a06d0e}.ni-tipo.trig{background:#f3e8ff;color:#7c3aed}
+  .ni-tipo.gate{background:#fde9c8;color:#b45309}.ni-tipo.offline{background:#f3f4f7;color:#4a5568}
+  .ni-tipo.plan{background:#fff7ed;color:#b45309}
+  .ni-desc{margin-bottom:9px;line-height:1.5}
+  .ni-file{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .ni-file code{background:#f1f5fb;border:1px solid var(--line);border-radius:6px;padding:3px 9px;color:#334155;font-size:11.5px}
+  .sw.flow{height:0;border:0;border-top:2px solid #8ba1c4;border-radius:0}
+  .sw.ctrl{height:0;border:0;border-top:2px dashed #7c3aed;border-radius:0}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .vcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+  .vcard:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(40,30,15,.11)}
+  .vcard .vic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:11px;background:#f6efe0}
+  .vcard .vic svg{width:21px;height:21px;stroke:var(--accent);stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .vcard h4{margin:0 0 4px;font-size:15px;color:var(--navy)} .vcard p{margin:0;font-size:13px;color:var(--muted)}
+  .decide{background:linear-gradient(135deg,#1a1512,#2c2419);color:#fff;border-radius:18px;padding:24px 26px;box-shadow:var(--shadow);border:1px solid #3a3126}
+  .decide h2{color:#fff}.decide .h2sub{color:rgba(255,255,255,.8)}
+  .decide ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:11px}
+  .decide li{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:13px 15px;font-size:13.6px;display:flex;gap:11px;align-items:flex-start}
+  .decide li .num{width:23px;height:23px;border-radius:50%;background:#ffd24a;color:#16233d;font-weight:800;font-size:12.5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  footer{padding:24px 0 44px;text-align:center;font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div style="display:flex;align-items:center;gap:14px"><img src="data:image/jpeg;base64,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" alt="LA CONCEPT" style="height:54px;width:54px;border-radius:10px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,.35)"><div><div class="wordmark">LA CONCEPT</div><div class="eyebrow">Operaciones · Automatización de reportes</div></div></div>
+    <h1>Automatización del cierre y la liquidación por marca</h1>
+    <div class="lede">Genera y distribuye automáticamente los reportes y liquidaciones de cada marca, con aprobación humana donde hay impacto económico. En la nube, a <b>costo cero</b>. <span style="opacity:.75">Vista <b>Técnica</b> para la arquitectura.</span></div>
+    <div class="hero-row">
+      <div class="pill"><span class="dot"></span> Listo — falta encender en la nube</div>
+      <div class="prog"><div class="lbl"><span>Avance</span><span>~80%</span></div><div class="bar"><i></i></div></div>
+      <div class="switch">
+        <button id="bEjec" class="on" onclick="setView('ejec')">Ejecutiva</button>
+        <button id="bTec" onclick="setView('tec')">Técnica</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PROBLEMA (venta) -->
+<section class="s-prob">
+  <div class="wrap">
+    <p class="kicker">El problema</p>
+    <h2>Hoy el cierre por marca es manual, lento y frágil</h2>
+    <p class="h2sub">Cada mes se elabora manualmente, marca por marca, con implicancias tributarias sensibles.</p>
+    <div class="cards">
+      <div class="vcard"><h4>🖐️ Trabajo manual</h4><p>Reportes y liquidaciones mensuales elaborados manualmente en Excel.</p></div>
+      <div class="vcard"><h4>⚠️ Riesgo tributario</h4><p>El documento tipo 43 se emite marca por marca en Bsale, sin carga masiva y sensible a errores de fecha/monto.</p></div>
+      <div class="vcard"><h4>👤 Depende de personas</h4><p>El proceso depende de personas específicas y no queda documentado; ante una ausencia, se interrumpe.</p></div>
+      <div class="vcard"><h4>🐌 Información tardía</h4><p>La gerencia no dispone de indicadores hasta el cierre, y las marcas reciben información limitada.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- QUÉ GANA EL NEGOCIO (venta · primero) -->
+<section class="s-val" style="background:#faf7f0">
+  <div class="wrap">
+    <p class="kicker">Qué gana el negocio</p>
+    <h2>Menos trabajo manual y menos riesgo — con tus datos convertidos en decisiones</h2>
+    <p class="h2sub">&nbsp;</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px">
+      <div style="flex:1;min-width:140px;background:#1a1512;border:1px solid #3a3126;border-radius:14px;padding:16px 18px"><div style="font-size:27px;font-weight:800;color:#c9a66b">≈10 h/sem</div><div style="font-size:12.5px;color:#e8e1d4">liberadas · 6 ingeniero + 4 contador</div></div>
+      <div style="flex:1;min-width:140px;background:#1a1512;border:1px solid #3a3126;border-radius:14px;padding:16px 18px"><div style="font-size:27px;font-weight:800;color:#c9a66b">40+</div><div style="font-size:12.5px;color:#e8e1d4">marcas cubiertas</div></div>
+      <div style="flex:1;min-width:140px;background:#1a1512;border:1px solid #3a3126;border-radius:14px;padding:16px 18px"><div style="font-size:27px;font-weight:800;color:#c9a66b">$0</div><div style="font-size:12.5px;color:#e8e1d4">infraestructura</div></div>
+      <div style="flex:1;min-width:140px;background:#1a1512;border:1px solid #3a3126;border-radius:14px;padding:16px 18px"><div style="font-size:27px;font-weight:800;color:#c9a66b">24/7</div><div style="font-size:12.5px;color:#e8e1d4">en la nube, sin depender de un PC</div></div>
+      <div style="flex:1;min-width:140px;background:#1a1512;border:1px solid #3a3126;border-radius:14px;padding:16px 18px"><div style="font-size:27px;font-weight:800;color:#c9a66b">Día 10</div><div style="font-size:12.5px;color:#e8e1d4">liquidación a tiempo</div></div>
+    </div>
+    <div class="cards">
+      <div class="vcard"><h4>⭐ Liquidación automatizada</h4><p>Reemplaza la emisión manual de la liquidación (<b>DTE 43</b>) por un proceso automatizado y validado, reduciendo carga operativa y riesgo tributario.</p></div>
+      <div class="vcard"><h4>📄 Reporte por marca</h4><p>Informe individual por marca, semanal y mensual, con ventas, desempeño y reposición sugerida. Cada marca accede únicamente a su información.</p></div>
+      <div class="vcard"><h4>🔒 Aprobación previa al envío</h4><p>Todo envío con impacto económico requiere validación humana explícita antes de ejecutarse.</p></div>
+      <div class="vcard"><h4>🤝 Mayor valor por marca</h4><p>Ampliamos el informe actual con KPIs, tendencias y reposición sugerida, elevando el valor entregado en cada ciclo.</p></div>
+      <div class="vcard"><h4>🧾 Trazabilidad y auditoría</h4><p>Proceso auditable de extremo a extremo: validaciones, control anti-duplicado y registro documentado.</p></div>
+      <div class="vcard"><h4>💰 Sin costo de infraestructura</h4><p>Opera bajo cuentas del negocio y sin infraestructura pagada, asegurando continuidad e independencia de personas.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAPA CLICKEABLE -->
+<section>
+  <div class="wrap">
+    <p class="kicker">Mapa del flujo · interactivo</p>
+    <h2>El recorrido, de la venta al correo</h2>
+    <p class="h2sub">Cada etapa tiene un semáforo. Haz clic para abrir su estado.</p>
+    <div class="journey" id="journey"></div>
+    <div class="hint">👆 Haz clic en una etapa para ver qué está hecho y qué falta</div>
+    <div class="detail" id="detail"></div>
+  </div>
+</section>
+
+<!-- REPORTES RAMIFICADO -->
+<section style="background:#fbf9f4">
+  <div class="wrap">
+    <p class="kicker">Qué se produce</p>
+    <h2>Los reportes que genera el sistema</h2>
+    <p class="h2sub">Del cálculo salen tres productos, cada uno con su propósito.</p>
+    <div class="branch">
+      <div class="bparent"><span class="bchip"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg> Motor de cálculo</span></div>
+      <div class="trunk"></div>
+      <div class="rcards">
+        <div class="rcard">
+          <div class="ric" style="background:linear-gradient(140deg,#c9a66b,#a9843f)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div>
+          <h4>Reporte por marca</h4>
+          <span class="tagm" style="background:#f2e8d2;color:#8a6a2a">Se envía a las marcas · Excel</span>
+          <p>Un Excel por marca con <b>filtro Semanal / Mensual</b>. Contiene únicamente su información.</p>
+          <ul>
+            <li>Liquidación — cuánto depositar</li>
+            <li>Desempeño — mes + acum. 3/6/12m, tendencia, estacionalidad</li>
+            <li>Productos — ranking + rotación de stock</li>
+            <li><b>Reposición sugerida</b></li>
+            <li>Detalle de ventas</li>
+          </ul>
+        </div>
+        <div class="rcard">
+          <div class="ric" style="background:linear-gradient(140deg,#2c2419,#514535)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></div>
+          <h4>Dashboard de gestión</h4>
+          <span class="tagm" style="background:#ece6da;color:#5c4a2e">Vista interna de gestión</span>
+          <p>Tablero de KPIs y tendencias del negocio (HTML interactivo).</p>
+          <ul>
+            <li>KPIs del mes (venta, ticket, var. MoM/YoY)</li>
+            <li>Tendencia 24 meses y estacionalidad</li>
+            <li>Ranking de marcas con recomendación</li>
+            <li>Rotación de stock / días de inventario</li>
+            <li>P&amp;L de la tienda (arriendo+comisión − gastos)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTELIGENCIA DE NEGOCIO (análisis del dashboard) -->
+<section>
+  <div class="wrap">
+    <p class="kicker">Inteligencia de negocio</p>
+    <h2>Lo que el dashboard puede responder</h2>
+    <p class="h2sub">Del mismo cubo salen decisiones — de la operación mensual a la estrategia. <span style="color:var(--muted)">Algunos ya activos; otros en hoja de ruta.</span></p>
+
+    <div class="cards" style="margin-bottom:16px">
+      <div class="vcard" style="border-left:4px solid var(--accent2)"><h4>👥 Clientes y recompra</h4><p><b>2.700 clientes</b> con nombre y email ya en Bsale que hoy no se usan: VIPs, frecuencia de recompra, clientes perdidos, base para campañas. <b>Activar un activo ya disponible.</b></p></div>
+      <div class="vcard" style="border-left:4px solid var(--accent2)"><h4>📐 Venta por m² por marca</h4><p>El indicador retail para redistribuir espacio y renegociar arriendos. Convierte la conversación con cada marca <b>de intuición a número</b>.</p></div>
+      <div class="vcard" style="border-left:4px solid var(--accent2)"><h4>🤝 Scorecard de negociación</h4><p>1 página por marca al renovar contrato: venta, tendencia, rotación, take rate, quiebres. Documento orientado a la marca.</p></div>
+    </div>
+
+    <div class="cards">
+      <div class="vcard"><h4>📆 Mensual · operación</h4>
+        <ul class="intel-list">
+          <li><b>P&amp;L de la tienda</b> — ¿gano o pierdo este mes?</li>
+          <li><b>Venta + proyección de cierre</b> vs. año anterior</li>
+          <li><b>KPI por marca</b> — qué marcas impulsan o frenan la venta</li>
+          <li><b>Ranking YTD + recomendación</b> — con quién actúo</li>
+          <li><b>Liquidaciones y cuadratura</b> — ¿pago lo correcto?</li>
+          <li><b>Quiebres y venta perdida</b> — ¿qué pido hoy?</li>
+          <li>Surtido base · stock muerto y rotación</li>
+          <li>Altas y bajas de marcas · gastos declarado vs estimado</li>
+        </ul></div>
+      <div class="vcard"><h4>📊 Trimestral · estratégico</h4>
+        <ul class="intel-list">
+          <li>Recurrente vs puntual — ¿qué modelo de negocio predomina?</li>
+          <li>Banda de precio — dónde compito y dónde compite el mall</li>
+          <li>Aporte por producto/marca — ¿qué exhibo en vitrina?</li>
+          <li>Curva de novedad — <b>51% de la venta en 4 semanas</b></li>
+          <li>Concentración — riesgo si se va una marca top</li>
+        </ul></div>
+      <div class="vcard"><h4>🚀 Para la venta + roadmap</h4>
+        <ul class="intel-list">
+          <li><b>Monitoreo efecto Arauco</b> — anticipar el impacto, no reaccionar a él</li>
+          <li>Precio realizado vs lista — qué solo rota con descuento</li>
+          <li>Conciliación bancaria y caja (Fintoc + Bsale)</li>
+          <li>Margen real por producto (con costos en Bsale)</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- FLUJO DE DATOS · DFD (Mermaid) -->
+<section class="tech-only">
+  <div class="wrap">
+    <p class="kicker">Arquitectura de datos</p>
+    <h2>Flujo de datos, de punta a punta</h2>
+    <p class="h2sub">Diagrama de Flujo de Datos (<b>DFD</b>) por niveles, sobre capas <b>Medallion</b> (bronze → silver → gold).</p>
+
+    <div class="dfd-title">
+      <span><b>DFD · Pipeline de Reportes LA CONCEPT</b></span>
+      <span>Metodología: DFD + Medallion · v1.0 · ago-2026</span>
+    </div>
+
+    <div class="leg2">
+      <span class="li"><span class="sw ent"></span> Entidad externa</span>
+      <span class="li"><span class="sw proc"></span> Proceso</span>
+      <span class="li"><span class="sw store"></span> Almacén</span>
+      <span class="li"><span class="sw mart"></span> Mart (vista gold)</span>
+      <span class="li"><span class="sw out"></span> Salida</span>
+      <span class="li"><span class="sw trig"></span> Disparador</span>
+      <span class="li"><span class="sw gate"></span> Gate de aprobación</span>
+      <span class="li"><span class="sw offline"></span> Fuente offline (no automatizada)</span>
+      <span class="li"><span class="sw plan"></span> Proceso pendiente (propuesto)</span>
+      <span class="li"><span class="sw flow"></span> Flujo de datos</span>
+      <span class="li"><span class="sw ctrl"></span> Disparo (orquestación)</span>
+    </div>
+
+    <div class="dfd-sub"><span class="bde">Nivel 0</span> Contexto — el sistema como una caja</div>
+    <div class="mermaid-wrap simple">
+<pre class="mermaid">
+flowchart LR
+  classDef ent fill:#eef2f9,stroke:#8593ab,stroke-width:2px,color:#243043;
+  classDef sys fill:#dbe9ff,stroke:#2563eb,stroke-width:3px,color:#13294b;
+  Bsale(["🛒 Bsale"]):::ent
+  Duena(["📗 Dueña · Cierre"]):::ent
+  Sistema["🏪 Sistema de Reportes LA CONCEPT"]:::sys
+  Marcas(["🏬 Marcas"]):::ent
+  Ger(["🧑‍💼 Gerencia"]):::ent
+  Bsale -->|"ventas, stock, precios"| Sistema
+  Duena -->|"arriendo, comisión, deuda"| Sistema
+  Sistema -->|"reporte + liquidación"| Marcas
+  Sistema -->|"dashboard de gestión"| Ger
+</pre>
+    </div>
+
+    <div class="dfd-sub"><span class="bde">Nivel 1</span> Detalle — procesos, almacenes y orquestación</div>
+    <div class="mermaid-wrap" id="dfdWrap">
+      <div class="dfd-tools">
+        <button onclick="dfdZoom(1)" title="Acercar">＋</button>
+        <button onclick="dfdZoom(-1)" title="Alejar">－</button>
+        <button onclick="dfdZoom(0)">Ajustar</button>
+        <button onclick="dfdFull()">⛶ Pantalla completa</button>
+      </div>
+      <div class="dfd-scroll">
+        <div id="dfdInner">
+<pre class="mermaid">
+flowchart LR
+  classDef ent fill:#eef2f9,stroke:#8593ab,stroke-width:2px,color:#243043;
+  classDef proc fill:#dbe9ff,stroke:#2563eb,stroke-width:2px,color:#13294b;
+  classDef store fill:#e7f0ff,stroke:#3b82f6,stroke-width:2px,color:#13294b;
+  classDef mart fill:#eaf7ee,stroke:#12a150,stroke-width:2px,color:#0f5c30;
+  classDef out fill:#fff3d6,stroke:#c99a1e,stroke-width:2px,color:#6b5310;
+  classDef trig fill:#f3e8ff,stroke:#7c3aed,stroke-width:2px,color:#4c1d95;
+  classDef gate fill:#fde9c8,stroke:#d97706,stroke-width:2px,color:#7c3a00;
+  classDef offline fill:#f3f4f7,stroke:#9aa8bf,stroke-width:2px,stroke-dasharray:5 3,color:#4a5568;
+  classDef plan fill:#fff7ed,stroke:#ea9a3c,stroke-width:2px,stroke-dasharray:5 3,color:#8a4b0a;
+
+  subgraph ORQ ["⚙️ Orquestación · GitHub Actions"]
+    Tsem["⏱️ Semanal · datos + dashboard + reporte"]:::trig
+    Tmes["📅 Mensual · + liquidación (cobro)"]:::trig
+    Tenv["✅ Envío a marcas · aprobación"]:::trig
+  end
+
+  Bsale(["🛒 Bsale API"]):::ent
+  Contratos(["📃 Contratos de marcas · offline"]):::offline
+  Cierre(["📗 Cierre mensual"]):::ent
+  Gastos(["🏠 Costos fijos · incl. arriendo local"]):::ent
+  Contactos(["👥 Contactos"]):::ent
+
+  subgraph BRONZE ["🥉 Bronze · crudo"]
+    Extraer["⬇️ Extraer"]:::proc
+    Raw[("📦 Datos crudos")]:::store
+  end
+
+  subgraph SILVER ["🥈 Silver · staging + cubo"]
+    S85["🧾 85 Liquidaciones"]:::proc
+    S86["📦 86 Stock"]:::proc
+    S87["🏷️ 87 Precios y costos"]:::proc
+    S88["💵 88 Gastos"]:::proc
+    Ingerir["📃 89 Ingerir contratos · pendiente"]:::plan
+    Staging[("🗃️ Staging · CSV")]:::store
+    Construir["🧊 80 Construir cubo"]:::proc
+    Cubo[("🧱 Cubo DuckDB")]:::store
+  end
+
+  subgraph GOLD ["🥇 Gold · marts + entrega"]
+    Vkpi[("📈 v_kpi_marca_mes")]:::mart
+    Vstock[("📦 v_stock_marca")]:::mart
+    Vpl[("🏬 v_pl_tienda_mes")]:::mart
+    Reco["🧠 Recomendación · reglas"]:::proc
+    Gmarca["📊 90 Generar reporte"]:::proc
+    Gdash["🗂️ 92 Generar dashboard"]:::proc
+    Rep["📄 Reporte por marca"]:::out
+    Resumen["📋 Resumen general"]:::out
+    Manifest[("📇 manifest.json")]:::store
+    Valida["✔️ Validar / QC"]:::proc
+    Dash["🖥️ Dashboard gestión"]:::out
+    Aprob{"✅ ¿Aprobado?"}:::gate
+    Enviar["✉️ Enviar"]:::proc
+  end
+
+  Marcas(["🏬 Marcas"]):::ent
+  Gerencia(["🧑‍💼 Gerencia"]):::ent
+
+  Bsale -->|"ventas y stock"| Extraer --> Raw
+  Bsale -->|"precios y costos"| S87 --> Staging
+  Contratos -->|"hoy: transcripción manual"| Cierre
+  Contratos --> Ingerir
+  Ingerir -->|"arriendo/comisión vigente"| Staging
+  Cierre -->|"deuda + validación"| S85 --> Staging
+  Raw -->|"stock"| S86 --> Staging
+  Gastos --> S88 --> Staging
+  Raw --> Construir
+  Staging --> Construir --> Cubo
+  Cubo --> Vkpi
+  Cubo --> Vstock
+  Cubo --> Vpl
+  Vkpi --> Gmarca
+  Vstock --> Gmarca
+  Vkpi --> Reco --> Gdash
+  Vpl --> Gdash
+  Vstock --> Gdash
+  Gmarca --> Rep --> Manifest --> Valida --> Aprob
+  Gmarca --> Resumen -->|"interno"| Gerencia
+  Gdash --> Dash -->|"interno"| Gerencia
+  Contactos --> Enviar
+  Aprob -->|"sí"| Enviar -->|"correo"| Marcas
+  Tsem -.-> Extraer
+  Tmes -.-> Extraer
+  Tenv -.-> Aprob
+
+  click Tsem call nodeInfo()
+  click Tmes call nodeInfo()
+  click Tenv call nodeInfo()
+  click Bsale call nodeInfo()
+  click Contratos call nodeInfo()
+  click Cierre call nodeInfo()
+  click Gastos call nodeInfo()
+  click Contactos call nodeInfo()
+  click Extraer call nodeInfo()
+  click Raw call nodeInfo()
+  click S85 call nodeInfo()
+  click S86 call nodeInfo()
+  click S87 call nodeInfo()
+  click S88 call nodeInfo()
+  click Ingerir call nodeInfo()
+  click Staging call nodeInfo()
+  click Construir call nodeInfo()
+  click Cubo call nodeInfo()
+  click Vkpi call nodeInfo()
+  click Vstock call nodeInfo()
+  click Vpl call nodeInfo()
+  click Reco call nodeInfo()
+  click Resumen call nodeInfo()
+  click Valida call nodeInfo()
+  click Gmarca call nodeInfo()
+  click Gdash call nodeInfo()
+  click Rep call nodeInfo()
+  click Manifest call nodeInfo()
+  click Dash call nodeInfo()
+  click Aprob call nodeInfo()
+  click Enviar call nodeInfo()
+  click Marcas call nodeInfo()
+  click Gerencia call nodeInfo()
+</pre>
+        </div>
+      </div>
+    </div>
+    <div class="node-info" id="dfdNodeInfo"><span class="ni-hint">👆 Haz clic en cualquier nodo del diagrama para ver qué es y qué archivo lo implementa.</span></div>
+    <div class="dfd-notes">
+      <div>↳ <b>Orquestación:</b> flechas punteadas = disparos. <b>Semanal</b> = refresca datos + regenera dashboard + envía el reporte de ventas a marcas · <b>Mensual</b> = suma la liquidación (cobro). El envío con cobro pasa por el <b>gate ¿Aprobado?</b>.</div>
+      <div>↳ <b>Staging (silver):</b> 4 jobs — 85 liquidaciones (del Cierre), 86 stock, 87 precios/costos (de Bsale), 88 gastos.</div>
+      <div>↳ <b>Arriendo y comisión:</b> los <b>términos</b> viven en la <b>tabla maestra de contratos</b> (Excel). Hoy la dueña los transcribe al <b>Cierre</b> (manual). <b>Propuesto (89):</b> un proceso que lea esa tabla → arriendo/comisión vigente por marca disponible <b>siempre</b> (incluido el reporte semanal, que no tiene Cierre); el Cierre quedaría solo para la <b>deuda</b>.</div>
+      <div>↳ <b>Ojo, dos arriendos:</b> el que <b>pagan las marcas</b> por su espacio (ingreso, va en la liquidación) vs. el <b>arriendo del local</b> (gasto fijo, en Costos fijos → job 88).</div>
+      <div>↳ <b>Marts (gold):</b> el reporte por marca se nutre de <code>v_kpi_marca_mes</code> + <code>v_stock_marca</code>; el dashboard suma <code>v_pl_tienda_mes</code>.</div>
+      <div>↳ <b>Contrato:</b> <code>manifest.json</code> es lo que lee el envío (archivo + email + a-depositar por marca).</div>
+      <div>↳ Usa <b>＋ / －</b> o <b>Pantalla completa</b> para agrandar.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CICLO DEL CONTADOR -->
+<section class="tech-only">
+  <div class="wrap">
+    <p class="kicker">Subsistema · liquidación tributaria</p>
+    <h2>Ciclo del contador</h2>
+    <p class="h2sub">El proceso mensual que emite la <b>liquidación oficial (DTE tipo 43)</b> a cada marca y paga por banco. Hoy es <b>manual</b>; el <b>to-be</b> lo automatiza y lo conecta al cubo.</p>
+
+    <div class="dfd-title">
+      <span><b>Ciclo del contador · LA CONCEPT</b></span>
+      <span>Levantado 20-ago-2026 · emisión día 10 · hitos: planilla 10-sep · piloto 10-sep · cierre 10-oct</span>
+    </div>
+
+    <div class="dfd-sub"><span class="bde" style="background:var(--pend)">As-is</span> Hoy · manual, marca por marca</div>
+    <div class="mermaid-wrap simple">
+<pre class="mermaid">
+flowchart LR
+  classDef ent fill:#eef2f9,stroke:#8593ab,stroke-width:2px,color:#243043;
+  classDef proc fill:#dbe9ff,stroke:#2563eb,stroke-width:2px,color:#13294b;
+  classDef store fill:#e7f0ff,stroke:#3b82f6,stroke-width:2px,color:#13294b;
+
+  aBsale[("🛒 Bsale")]:::store
+  aContratos[("📃 Contratos x marca")]:::store
+  aTablaB[("🏦 Maestro bancario")]:::store
+  aCartola[("🧾 Cartola")]:::store
+  aPOS(["🖨️ POS tienda"]):::ent
+  aBanco(["🏦 Banco tienda"]):::ent
+  aSII(["🏛️ SII"]):::ent
+  aMarcas(["🏬 ~40 Marcas"]):::ent
+
+  A1["1 · Descargar Bsale → Excel"]:::proc
+  aMaestro[("📊 Excel maestro")]:::store
+  A2["2 · % uso por medio de cobro"]:::proc
+  A3["3 · Ventas x marca x medio"]:::proc
+  A4["4 · Cobro por contrato · venta + comisión"]:::proc
+  A5["5 · Día 10 · emitir tipo 43 + arriendo · MANUAL"]:::proc
+  A6["6 · Conciliación banco ↔ Bsale"]:::proc
+  A7["7 · TXT de pago masivo"]:::proc
+
+  aBsale --> A1 --> aMaestro
+  aMaestro --> A2
+  aMaestro --> A3 --> A4
+  aContratos --> A4 --> A5
+  A5 -->|"escribe tipo 43"| aBsale
+  A5 --> aSII
+  aSII -->|"folio LF"| A5
+  A5 -->|"liquidación"| aMarcas
+  aCartola --> A6
+  aPOS --> A6
+  aTablaB --> A7
+  A5 -.->|"folios LF"| A7
+  A7 --> aBanco
+  aBanco -->|"paga: venta − comisión − arriendo − NC"| aMarcas
+
+  click aBsale call nodeInfo()
+  click aContratos call nodeInfo()
+  click aTablaB call nodeInfo()
+  click aCartola call nodeInfo()
+  click aPOS call nodeInfo()
+  click aBanco call nodeInfo()
+  click aSII call nodeInfo()
+  click aMarcas call nodeInfo()
+  click A1 call nodeInfo()
+  click aMaestro call nodeInfo()
+  click A2 call nodeInfo()
+  click A3 call nodeInfo()
+  click A4 call nodeInfo()
+  click A5 call nodeInfo()
+  click A6 call nodeInfo()
+  click A7 call nodeInfo()
+</pre>
+    </div>
+
+    <div class="dfd-sub"><span class="bde" style="background:var(--accent2);color:#3a2a10">To-be</span> Propuesto · automatizado y conectado al cubo</div>
+    <div class="mermaid-wrap simple">
+<pre class="mermaid">
+flowchart LR
+  classDef ent fill:#eef2f9,stroke:#8593ab,stroke-width:2px,color:#243043;
+  classDef store fill:#e7f0ff,stroke:#3b82f6,stroke-width:2px,color:#13294b;
+  classDef plan fill:#fff7ed,stroke:#ea9a3c,stroke-width:2px,stroke-dasharray:5 3,color:#8a4b0a;
+  classDef gate fill:#fde9c8,stroke:#d97706,stroke-width:2px,color:#7c3a00;
+
+  tCubo[("🧱 Cubo DuckDB")]:::store
+  tSheet[("📗 Google Sheet de cierre · montos solo-lectura")]:::plan
+  tContador(["🧑‍💼 Contador"]):::ent
+  tGate{"✅ Aprobado / Rechazado · x marca"}:::gate
+  tValida["✔️ Validaciones · snapshot · RUT · cuadratura · anti-duplicado"]:::plan
+  tAPI["🔌 Emisión API Bsale · POST /v1/documents.json"]:::plan
+  tBsale[("🛒 Bsale · tipo 43")]:::store
+  tManifest[("📇 manifest · folios LF")]:::store
+  tTXT["🏦 TXT de pago masivo"]:::plan
+  tBanco(["🏦 Banco"]):::ent
+  tMarcas(["🏬 Marcas"]):::ent
+
+  tCubo -->|"montos"| tSheet --> tContador --> tGate
+  tGate -->|"aprobado"| tValida --> tAPI
+  tAPI -->|"emite tipo 43"| tBsale
+  tAPI -->|"folios"| tManifest --> tTXT --> tBanco --> tMarcas
+  tGate -.->|"rechazado → corrige en el origen"| tCubo
+
+  click tCubo call nodeInfo()
+  click tSheet call nodeInfo()
+  click tContador call nodeInfo()
+  click tGate call nodeInfo()
+  click tValida call nodeInfo()
+  click tAPI call nodeInfo()
+  click tBsale call nodeInfo()
+  click tManifest call nodeInfo()
+  click tTXT call nodeInfo()
+  click tBanco call nodeInfo()
+  click tMarcas call nodeInfo()
+</pre>
+    </div>
+
+    <div class="node-info" id="dfdNodeInfo2"><span class="ni-hint">👆 Haz clic en cualquier nodo (as-is o to-be) para ver qué es y qué archivo lo implementa.</span></div>
+    <div class="dfd-notes">
+      <div>↳ <b>Semántica del tipo 43:</b> la liquidación factura declara que esas ventas son ingreso de la <b>marca</b>, no de LA CONCEPT; el ingreso de la tienda es la <b>comisión</b>. Aparte va la factura de <b>arriendo</b>.</div>
+      <div>↳ <b>Reglas:</b> NC con &gt;10 días se descuentan a la marca el mes siguiente · dato dimensional extra: <b>m² por marca</b> · sensible a las fechas de emisión.</div>
+      <div>↳ <b>To-be · correcciones:</b> NC electrónica por API referenciando el folio — código 1 anula · 2 corrige glosa · 3 corrige montos — dentro del mismo mes tributario.</div>
+      <div>↳ <b>Bloqueos:</b> contratos por marca · datos bancarios de las marcas · definición del banco de la tienda (formato del TXT).</div>
+    </div>
+  </div>
+</section>
+
+<!-- DECISIONES -->
+<section>
+  <div class="wrap">
+    <div class="decide">
+      <h2>Qué falta para entrar en producción</h2>
+      <div class="h2sub">Cuatro definiciones para pasar de "listo" a "en producción".</div>
+      <ul>
+        <li><span class="num">1</span><div><b>Cuenta del proyecto</b><br>Crear el repositorio del negocio (independiente de personas).</div></li>
+        <li><span class="num">2</span><div><b>Correo institucional</b><br>Definir desde qué correo se envían los reportes.</div></li>
+        <li><span class="num">3</span><div><b>Contactos de marcas</b><br>Completar los 47 correos que faltan.</div></li>
+        <li><span class="num">4</span><div><b>Autorización del primer envío</b><br>Revisar la lista y autorizar el primer envío a marcas.</div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- HACIA DÓNDE ESCALA -->
+<section>
+  <div class="wrap">
+    <p class="kicker">Hacia dónde escala</p>
+    <h2>La fase 1 de una plataforma</h2>
+    <p class="h2sub">El pipeline de reportes es el primer eje. Sobre la misma base de datos crecen los siguientes — el mapa completo, más abajo.</p>
+    <div class="cards">
+      <div class="vcard" style="border-left:3px solid var(--accent2)">
+        <span style="display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.5px;color:#8a6a2a;background:#f2e8d2;border-radius:999px;padding:2px 10px;margin-bottom:9px">FASE 1 · AHORA</span>
+        <h4>Reportes y liquidación por marca</h4>
+        <p>Generación, liquidación y envío por marca, automatizado y en la nube.</p>
+      </div>
+      <div class="vcard" style="border-left:3px solid var(--wip)">
+        <span style="display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.5px;color:#8a5a00;background:#fdf1dc;border-radius:999px;padding:2px 10px;margin-bottom:9px">FASE 2 · PRÓXIMO</span>
+        <h4>Contador + inteligencia de negocio</h4>
+        <p>Automatización de la liquidación tributaria (tipo 43) e inteligencia sobre datos que ya tienes: recompra, margen, negociación.</p>
+      </div>
+      <div class="vcard" style="border-left:3px solid #b8b0a2">
+        <span style="display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.5px;color:#6b6459;background:#ece8e0;border-radius:999px;padding:2px 10px;margin-bottom:9px">FASE 3 · HORIZONTE</span>
+        <h4>Cimientos y nuevos canales</h4>
+        <p>Catálogo y control como base sólida; y el canal <b>Online (Shopify)</b> como iniciativa aparte de negocio.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:6px">
+  <div class="wrap" style="text-align:center">
+    <a href="arbol-la-concept.html" target="_blank" style="display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--accent2);color:var(--navy);background:#fff;border-radius:999px;padding:12px 22px;font-weight:650;font-size:14px;text-decoration:none;box-shadow:var(--shadow)">🌳 Ver el mapa completo de procesos <span style="color:var(--accent);font-weight:800">→</span></a>
+    <p style="font-size:12.5px;color:var(--muted);margin:11px 0 0">Este tablero es el eje <b style="color:var(--navy)">Liquidaciones</b> del mapa estratégico de LA CONCEPT.</p>
+  </div>
+</section>
+
+<footer>LA CONCEPT · Estado del proyecto · ago-2026 · detalle técnico completo en <b>SPEC.md</b></footer>
+
+<script>
+const ICONS={
+  ventas:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.6 3.6 3 8 3s8-1.4 8-3V5"/><path d="M4 12c0 1.6 3.6 3 8 3s8-1.4 8-3"/>',
+  calculo:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+  reportes:'<line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="8"/><line x1="18" y1="20" x2="18" y2="4"/>',
+  envio:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+  auto:'<path d="M18 10h-1.3A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>'
+};
+const CHK='<svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg>';
+const DOT='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>';
+const LBL={ok:'Listo',wip:'En curso',pend:'Pendiente'};
+const STAGES=[
+ {k:'ventas',t:'Ventas',status:'ok',sub:'Bsale entrega las ventas en tiempo real',
+  resumen:'Las ventas (boletas, facturas, notas de crédito) se bajan de Bsale y se refrescan solas.',
+  hecho:['Extracción automática desde la API de Bsale','Refresco incremental (últimos 14 días) en &lt;2 min','Token guardado seguro (Keychain / variable de entorno)'],
+  todo:['Refresco en la nube hoy es completo (pesado); optimizar a incremental'],
+  comp:['analisis/bsale_extraccion.py','Cierre mensual (input manual)','contactos_marcas.csv (15/62)']},
+ {k:'calculo',t:'Cálculo',status:'ok',sub:'Se cruza con arriendo, comisión y stock',
+  resumen:'Un motor de datos unifica ventas + liquidación + stock + gastos, aplicando las reglas del negocio.',
+  hecho:['Base de datos unificada (cubo) construida','Venta=boletas+facturas−NC · Bruto=neto×1,19','Atribución de marca recuperada (sin-atribuir 73%→11%)','KPIs por marca, P&amp;L de la tienda y stock'],
+  todo:['Extraer las reglas de cálculo a un módulo testeable (reglas.py)'],
+  comp:['analisis/80_cubo_bsale.py','staging 85/86/87/88','cubo/ventas.duckdb (5 MB)']},
+ {k:'reportes',t:'Reportes',status:'wip',sub:'Reporte por marca + dashboard de gestión',
+  resumen:'Dos productos: el Reporte por marca (Excel a las marcas) y el Dashboard de gestión (interno).',
+  hecho:['Informe por marca base (liquidación + detalle)','Dashboard de gestión (KPIs)','Reposición sugerida dentro del reporte'],
+  todo:['Enriquecer el reporte: filtro Semanal/Mensual','Sumar desempeño (3/6/12m, tendencia, estacionalidad)','Sumar productos (ranking + rotación de stock)','Refinar el dashboard de gestión'],
+  comp:['90_informe_por_marca.py','92_dashboard_gestion.py']},
+ {k:'envio',t:'Envío',status:'wip',sub:'A cada marca y a gerencia, por correo',
+  resumen:'Cada Excel se envía por correo a su destinatario. El envío a marcas queda tras un paso de aprobación.',
+  hecho:['Envío por correo funcionando (gerencia / marcas)','Prueba real a correo interno OK (con adjunto)','Modo "dry-run": lista destinatarios sin enviar','Tests de seguridad del envío: 3/3'],
+  todo:['Completar 47 correos de marcas faltantes','Definir correo institucional de envío','Primer envío real a marcas (con aprobación)'],
+  comp:['scripts/enviar_correos.py','contactos_marcas.csv (15/62)']},
+ {k:'auto',t:'Automático',status:'pend',sub:'Corre solo en la nube, sin depender de un PC',
+  resumen:'Todo corre programado en la nube (gratis): semanal automático + mensual con botón de aprobación.',
+  hecho:['3 flujos escritos (semanal / mensual / envío-marcas)','Configuración de seguridad y de qué NO subir','Especificación (SPEC.md) + tests como respaldo'],
+  todo:['Crear el repositorio en la nube (GitHub)','Cargar los accesos (token Bsale, correo)','Encender los flujos programados','Transferir el repo a la organización de LA CONCEPT'],
+  comp:['.github/workflows/semanal.yml','mensual.yml','enviar-marcas.yml']},
+];
+function li(items,cls){return items.map(x=>`<li>${cls==='done'?CHK:DOT}<span>${x}</span></li>`).join('')}
+function render(i){
+  const s=STAGES[i];
+  document.querySelectorAll('.node').forEach((n,j)=>n.classList.toggle('active',j===i));
+  document.getElementById('detail').innerHTML=`
+    <div class="dhead"><div class="di"><svg viewBox="0 0 24 24">${ICONS[s.k]}</svg></div>
+      <div><h3>${s.t}</h3><p>${s.resumen}</p></div><span class="stag ${s.status}">${LBL[s.status]}</span></div>
+    <div class="dbody">
+      <div class="dcol done"><h4>✓ Hecho</h4><ul>${li(s.hecho,'done')}</ul></div>
+      <div class="dcol todo"><h4>○ Pendiente</h4><ul>${li(s.todo,'todo')}</ul></div></div>
+    <div class="comp tech-only"><h4>Componentes / archivos</h4>${s.comp.map(c=>`<span class="chip">${c}</span>`).join('')}</div>`;
+}
+function buildJourney(){
+  document.getElementById('journey').innerHTML=STAGES.map((s,i)=>`
+    <button class="node" onclick="render(${i})"><div class="ico"><span class="st ${s.status}"></span><svg viewBox="0 0 24 24">${ICONS[s.k]}</svg></div>
+    <h3>${s.t}</h3><p>${s.sub}</p></button>`).join('');
+}
+function setView(v){
+  document.body.classList.toggle('tech',v==='tec');
+  document.getElementById('bTec').classList.toggle('on',v==='tec');
+  document.getElementById('bEjec').classList.toggle('on',v!=='tec');
+  // Los diagramas viven en secciones ocultas: se dibujan al abrir Técnica por 1ª vez.
+  if(v==='tec' && !window._mmRun){ window._mmRun=true; if(window.mermaid){ try{ mermaid.run(); }catch(e){} } }
+}
+buildJourney(); render(0);
+
+// Ficha de nodo del DFD (click en el diagrama)
+const NODEINFO={
+  Tsem:{tipo:'Disparador',cls:'trig',titulo:'Workflow Semanal',desc:'Corre automático 1 vez por semana (cron). Refresca datos de Bsale, regenera el dashboard y envía el reporte semanal de ventas a las marcas.',archivo:'.github/workflows/semanal.yml'},
+  Tmes:{tipo:'Disparador',cls:'trig',titulo:'Workflow Mensual',desc:'Botón para iniciar la ejecución mensual (manual). Genera el reporte por marca CON liquidación (cobro). Se corre tras subir el Cierre del mes.',archivo:'.github/workflows/mensual.yml'},
+  Tenv:{tipo:'Disparador',cls:'trig',titulo:'Workflow Envío a marcas',desc:'Botón de aprobación: tras revisar, envía a cada marca su Excel. La primera corrida solo lista destinatarios (dry-run).',archivo:'.github/workflows/enviar-marcas.yml'},
+  Bsale:{tipo:'Entidad externa',cls:'ent',titulo:'Bsale API',desc:'Sistema de ventas de la tienda. Fuente de ventas, stock, catálogo y precios/costos.',archivo:'API Bsale → datos/bsale/*.csv'},
+  Contratos:{tipo:'Fuente offline',cls:'offline',titulo:'Contratos de marcas (Excel maestro)',desc:'Excel que consolida los contratos de las marcas: arriendo (UF) y comisión (%) por marca. Hoy es OFFLINE — la dueña lo usa para llenar el Cierre; el pipeline no lo lee todavía. Como es Excel estructurado, se podría automatizar a futuro.',archivo:'datos/contratos/…  (tabla maestra .xlsx)'},
+  Cierre:{tipo:'Entidad externa',cls:'ent',titulo:'Cierre mensual',desc:'Excel que la dueña llena cada mes con arriendo, comisión y deuda por marca. Único input manual del cobro.',archivo:'informe/Cierre Ventas <mes>.xlsx'},
+  Gastos:{tipo:'Entidad externa',cls:'ent',titulo:'Costos fijos',desc:'Costos fijos de la tienda, incluye el arriendo del LOCAL (distinto del arriendo que pagan las marcas).',archivo:'datos/…/COSTOS FIJOS.xlsx'},
+  Contactos:{tipo:'Entidad externa',cls:'ent',titulo:'Contactos de marcas',desc:'CSV con el correo de cada marca (hoy 15 de 62 completos). Define a quién se le envía.',archivo:'correos/contactos_marcas.csv'},
+  Extraer:{tipo:'Proceso',cls:'proc',titulo:'Extraer',desc:'Baja los datos desde la API de Bsale. Refresco incremental (últimos 14 días).',archivo:'analisis/bsale_extraccion.py'},
+  Raw:{tipo:'Almacén',cls:'store',titulo:'Datos crudos',desc:'Volcado tal cual de Bsale (documentos, variantes, stock, tipos de producto…).',archivo:'datos/bsale/*.csv'},
+  S85:{tipo:'Proceso',cls:'proc',titulo:'85 · Liquidaciones',desc:'Parsea todos los Cierre y arma la liquidación por marca (venta, arriendo, comisión, deuda, a depositar).',archivo:'analisis/85_liquidaciones.py'},
+  S86:{tipo:'Proceso',cls:'proc',titulo:'86 · Stock snapshot',desc:'Guarda la foto de stock por día (dedup) para medir rotación e inventario.',archivo:'analisis/86_stock_snapshot.py'},
+  S87:{tipo:'Proceso',cls:'proc',titulo:'87 · Precios y costos',desc:'Trae precios de lista y costos por variante desde la API de Bsale.',archivo:'analisis/87_precios_costos.py'},
+  S88:{tipo:'Proceso',cls:'proc',titulo:'88 · Gastos fijos',desc:'Valida/crea la tabla de gastos fijos mensuales (incl. arriendo del local).',archivo:'analisis/88_gastos_fijos.py'},
+  Ingerir:{tipo:'Proceso · pendiente',cls:'plan',titulo:'89 · Ingerir contratos (propuesto)',desc:'Leería la tabla maestra de contratos (Excel) → arriendo (UF) y comisión (%) VIGENTE por marca. Así el arriendo por marca está disponible SIEMPRE, incluido el reporte semanal (que no tiene Cierre). El Cierre quedaría solo para la deuda y validación. Cierra el punto de error manual. Aún no construido.',archivo:'analisis/89_contratos.py (propuesto)'},
+  Staging:{tipo:'Almacén',cls:'store',titulo:'Staging · 4 CSV',desc:'Datos ya procesados y listos para el cubo: liquidaciones, stock, precios/costos, gastos.',archivo:'datos/procesados/*.csv'},
+  Construir:{tipo:'Proceso',cls:'proc',titulo:'80 · Construir cubo',desc:'Integra crudo + staging y arma el cubo analítico (hechos, dimensiones y vistas).',archivo:'analisis/80_cubo_bsale.py'},
+  Cubo:{tipo:'Almacén',cls:'store',titulo:'Cubo DuckDB',desc:'Base analítica "una sola verdad": hechos (ventas, liquidación, stock, gastos), dimensiones y vistas.',archivo:'cubo/ventas.duckdb'},
+  Vkpi:{tipo:'Mart (vista gold)',cls:'mart',titulo:'v_kpi_marca_mes',desc:'KPIs por marca y mes: venta, unidades, ticket, variación MoM/YoY, share, a depositar.',archivo:'vista en cubo/ventas.duckdb'},
+  Vstock:{tipo:'Mart (vista gold)',cls:'mart',titulo:'v_stock_marca',desc:'Stock por marca: unidades, valorizado y días de inventario (para reposición).',archivo:'vista en cubo/ventas.duckdb'},
+  Vpl:{tipo:'Mart (vista gold)',cls:'mart',titulo:'v_pl_tienda_mes',desc:'P&L de la tienda por mes: ingresos (arriendo+comisión) − gastos fijos = resultado.',archivo:'vista en cubo/ventas.duckdb'},
+  Reco:{tipo:'Proceso',cls:'proc',titulo:'Recomendación por marca',desc:'Motor por reglas que clasifica cada marca: Impulsar / Mantener / Revisar / Riesgo. Alimenta el dashboard. Decisión: el rótulo queda INTERNO — no va en el reporte que recibe la marca (evita fricción).',archivo:'analisis/reco_marcas.py'},
+  Resumen:{tipo:'Salida',cls:'out',titulo:'Resumen general (consolidado)',desc:'Libro Excel con TODAS las marcas, para gerencia. No se envía a las marcas: cada marca solo ve su propia data.',archivo:'informe/reportes/<fecha>/Informe_general.xlsx'},
+  Valida:{tipo:'Proceso',cls:'proc',titulo:'Validar / QC',desc:'Chequeos antes de enviar: líneas "sin atribuir", marcas sin cierre, cuadratura (suma del resumen = suma de las pestañas) y tests de aceptación. Refuerza el "nada sale con datos malos".',archivo:'tests/ + avisos en manifest.json'},
+  Gmarca:{tipo:'Proceso',cls:'proc',titulo:'90 · Generar reporte por marca',desc:'Arma el Excel por marca (liquidación, desempeño, productos, reposición) + el manifest.',archivo:'analisis/90_informe_por_marca.py'},
+  Gdash:{tipo:'Proceso',cls:'proc',titulo:'92 · Generar dashboard',desc:'Arma el dashboard de gestión (HTML interactivo) con KPIs, tendencias y stock.',archivo:'analisis/92_dashboard_gestion.py'},
+  Rep:{tipo:'Salida',cls:'out',titulo:'Reporte por marca',desc:'El Excel que se envía a cada marca. Solo su data. Con filtro semanal/mensual.',archivo:'informe/reportes/<fecha>/por_marca/*.xlsx'},
+  Manifest:{tipo:'Almacén (contrato)',cls:'store',titulo:'manifest.json',desc:'Lo que lee el envío: por cada marca, su archivo + email + monto a depositar + avisos.',archivo:'informe/reportes/<fecha>/manifest.json'},
+  Dash:{tipo:'Salida',cls:'out',titulo:'Dashboard de gestión',desc:'Tablero HTML interno para gerencia (no se envía a marcas).',archivo:'informe/dashboard_gestion.html'},
+  Aprob:{tipo:'Gate de aprobación',cls:'gate',titulo:'¿Aprobado?',desc:'Paso humano antes de enviar a marcas (el envío con cobro no sale solo). Se acciona corriendo el workflow de envío.',archivo:'decisión manual · workflow_dispatch'},
+  Enviar:{tipo:'Proceso',cls:'proc',titulo:'Enviar',desc:'Manda a cada marca su Excel por correo (SMTP). Omite marcas sin email.',archivo:'scripts/enviar_correos.py'},
+  Marcas:{tipo:'Entidad externa',cls:'ent',titulo:'Marcas',desc:'Reciben por correo su reporte (semanal de ventas y mensual con liquidación).',archivo:'destinatarios (correo)'},
+  Gerencia:{tipo:'Entidad externa',cls:'ent',titulo:'Gerencia',desc:'Recibe el dashboard de gestión y el resumen general (vista interna).',archivo:'destinatarios (interno)'},
+  // --- Ciclo del contador · AS-IS ---
+  aBsale:{tipo:'Almacén',cls:'store',titulo:'Bsale',desc:'Ventas del mes: boletas (39), facturas (33), notas de crédito (61) y medios de cobro.',archivo:'Bsale (API / export)'},
+  aContratos:{tipo:'Almacén',cls:'store',titulo:'Contratos por marca',desc:'Términos de cada marca: % comisión, arriendo y metros cuadrados.',archivo:'Contratos (Excel maestro)'},
+  aTablaB:{tipo:'Almacén',cls:'store',titulo:'Maestro bancario',desc:'Por marca: RUT, razón social, banco/cuenta y folio LF. Base para el pago masivo.',archivo:'Tabla maestro bancaria'},
+  aCartola:{tipo:'Almacén',cls:'store',titulo:'Cartola bancaria',desc:'Movimientos del banco de la tienda, para conciliar contra Bsale.',archivo:'Cartola del banco'},
+  aPOS:{tipo:'Entidad externa',cls:'ent',titulo:'POS de la tienda',desc:'Cierre de venta físico en la máquina (proceso diario, no automatizable).',archivo:'máquina POS'},
+  aBanco:{tipo:'Entidad externa',cls:'ent',titulo:'Banco de la tienda',desc:'Ejecuta la nómina de pago a las marcas (venta − comisión − arriendo − NC).',archivo:'banco'},
+  aSII:{tipo:'Entidad externa',cls:'ent',titulo:'SII',desc:'Asigna el folio (LF) a cada liquidación factura emitida.',archivo:'SII'},
+  aMarcas:{tipo:'Entidad externa',cls:'ent',titulo:'~40 Marcas (mandantes)',desc:'Reciben su liquidación (tipo 43) y su pago por banco.',archivo:'marcas'},
+  A1:{tipo:'Proceso',cls:'proc',titulo:'1 · Descargar Bsale → Excel',desc:'El contador baja las ventas del mes a su Excel maestro de trabajo.',archivo:'manual (contador)'},
+  aMaestro:{tipo:'Almacén',cls:'store',titulo:'Excel maestro del contador',desc:'Planilla de trabajo con las ventas del mes, base de todos los cálculos.',archivo:'Excel del contador'},
+  A2:{tipo:'Proceso',cls:'proc',titulo:'2 · % de uso por medio de cobro',desc:'Monitorea cuánto se pagó con crédito / otros medios.',archivo:'manual (contador)'},
+  A3:{tipo:'Proceso',cls:'proc',titulo:'3 · Ventas por marca × medio de cobro',desc:'Desglosa las ventas por marca y por medio de cobro.',archivo:'manual (contador)'},
+  A4:{tipo:'Proceso',cls:'proc',titulo:'4 · Cobro por contrato',desc:'Aplica % comisión + arriendo del contrato → monto a facturar por marca (venta + comisión).',archivo:'manual (contador)'},
+  A5:{tipo:'Proceso',cls:'proc',titulo:'5 · Día 10 · emisión manual',desc:'Por cada marca copia el RUT y crea la liquidación factura (DTE tipo 43; documentTypeId=30 en esta cuenta) con monto, fecha y glosa única. La UI no tiene carga masiva. Aparte, factura de arriendo.',archivo:'Bsale (manual)'},
+  A6:{tipo:'Proceso',cls:'proc',titulo:'6 · Conciliación banco ↔ Bsale',desc:'Cruce diario de la cartola bancaria contra Bsale.',archivo:'manual (contador)'},
+  A7:{tipo:'Proceso',cls:'proc',titulo:'7 · TXT de pago masivo',desc:'Arma el archivo de nómina para el banco (paga a cada marca su parte). El formato depende del banco (sin definir).',archivo:'TXT bancario'},
+  // --- Ciclo del contador · TO-BE ---
+  tCubo:{tipo:'Almacén',cls:'store',titulo:'Cubo DuckDB',desc:'Fuente de los montos (solo-lectura) para el cierre automatizado.',archivo:'cubo/ventas.duckdb'},
+  tSheet:{tipo:'Propuesto',cls:'plan',titulo:'Google Sheet de cierre',desc:'Se genera solo desde el cubo: montos solo-lectura; el contador solo marca Aprobado/Rechazado + comentarios. Las correcciones van al origen, no al Sheet.',archivo:'Google Sheet (propuesto)'},
+  tContador:{tipo:'Entidad externa',cls:'ent',titulo:'Contador',desc:'Revisa y aprueba/rechaza marca por marca en el Sheet.',archivo:'contador'},
+  tGate:{tipo:'Gate de aprobación',cls:'gate',titulo:'Aprobado / Rechazado',desc:'Decisión por marca. Rechazado → se corrige en el origen y se regenera el Sheet.',archivo:'aprobación en el Sheet'},
+  tValida:{tipo:'Propuesto',cls:'plan',titulo:'Validaciones',desc:'Snapshot congelado entre aprobación y emisión · RUT · cuadratura vs ventas · anti-duplicado (consulta docs tipo 43 por RUT + mes).',archivo:'analisis/ (propuesto)'},
+  tAPI:{tipo:'Propuesto',cls:'plan',titulo:'Emisión por API Bsale',desc:'POST /v1/documents.json con documentTypeId=30, solo de lo aprobado. Verificado por API: tipo 43 activo y electrónico en la cuenta.',archivo:'API Bsale (propuesto)'},
+  tBsale:{tipo:'Almacén',cls:'store',titulo:'Bsale · tipo 43',desc:'Recibe la liquidación factura emitida por API (con su folio LF).',archivo:'Bsale'},
+  tManifest:{tipo:'Almacén',cls:'store',titulo:'manifest · folios',desc:'Guarda los folios LF emitidos por marca (para el pago y la trazabilidad).',archivo:'manifest.json'},
+  tTXT:{tipo:'Propuesto',cls:'plan',titulo:'TXT de pago masivo',desc:'Se arma desde las filas aprobadas y emitidas → el banco paga a las marcas.',archivo:'TXT bancario (propuesto)'},
+  tBanco:{tipo:'Entidad externa',cls:'ent',titulo:'Banco',desc:'Ejecuta el pago masivo a las marcas.',archivo:'banco'},
+  tMarcas:{tipo:'Entidad externa',cls:'ent',titulo:'Marcas',desc:'Reciben la liquidación (por API) y el pago (por banco).',archivo:'marcas'},
+};
+function nodeInfo(id){
+  const d=NODEINFO[id];
+  const html = d
+    ? `<div class="ni-head"><span class="ni-tipo ${d.cls}">${d.tipo}</span><b>${d.titulo}</b></div>`+
+      `<div class="ni-desc">${d.desc}</div>`+
+      `<div class="ni-file"><span>📎 Archivo:</span><code>${d.archivo}</code></div>`
+    : '<span class="ni-hint">Sin ficha para '+id+'</span>';
+  ['dfdNodeInfo','dfdNodeInfo2'].forEach(pid=>{const box=document.getElementById(pid); if(box) box.innerHTML=html;});
+}
+
+// Zoom del DFD
+let dfdScale=1;
+function dfdZoom(d){
+  dfdScale = d===0 ? 1 : Math.min(2.6, Math.max(.5, dfdScale + d*0.2));
+  const el=document.getElementById('dfdInner'); if(el) el.style.transform='scale('+dfdScale+')';
+}
+function dfdFull(){
+  const el=document.getElementById('dfdWrap'); if(!el) return;
+  if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen||function(){}).call(el); }
+  else { document.exitFullscreen(); }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  if(window.mermaid){
+    mermaid.initialize({
+      startOnLoad:false, securityLevel:'loose', theme:'base',
+      themeVariables:{fontFamily:'-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif',fontSize:'15px',
+        clusterBkg:'#f7f9fd',clusterBorder:'#dbe4f1',lineColor:'#8ba1c4',
+        primaryColor:'#dbe9ff',primaryBorderColor:'#2563eb',primaryTextColor:'#13294b'},
+      flowchart:{curve:'basis',nodeSpacing:46,rankSpacing:78,padding:12,useMaxWidth:false}
+    });
+  }
+</script>
+</body>
+</html>

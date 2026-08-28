@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Concept · Árbol de procesos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300;400;500&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --noche:#14151a;
+    --lienzo:#1b1d25;
+    --papel:#ece5da;
+    --papel-tenue:#a9a294;
+    --hilo:#4a4a55;
+    --borde:#282b35;
+
+    --eje-liq:#a8443c;
+    --eje-cat:#c9a227;
+    --eje-tie:#6b8f71;
+    --eje-onl:#4a6fa5;
+    --eje-fin:#8a6a9c;
+    --eje-con:#3f8f8a;
+
+    --vivo:#6b8f71;
+    --obra:#c9a227;
+    --plan:#50505c;
+
+    --display:'Cormorant', Georgia, serif;
+    --texto:'DM Sans', system-ui, sans-serif;
+    --dato:'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--noche);color:var(--papel);font-family:var(--texto)}
+  body{padding:14px 14px 40px;max-width:820px;margin:0 auto}
+
+  /* ---------- encabezado ---------- */
+  header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:6px 4px 14px}
+  .marca{font-family:var(--display);font-size:26px;font-weight:400;letter-spacing:.22em;line-height:1}
+  .marca span{color:var(--papel-tenue)}
+  .conteo{font-family:var(--dato);font-size:10px;letter-spacing:.12em;color:var(--papel-tenue);text-align:right;line-height:1.7}
+  .conteo b{color:var(--papel);font-weight:500}
+  .volver-tablero{display:inline-block;margin-top:6px;font-family:var(--dato);font-size:9px;letter-spacing:.14em;color:var(--papel-tenue);text-decoration:none;border-bottom:1px solid transparent}
+  .volver-tablero:hover{color:var(--papel);border-color:var(--papel-tenue)}
+
+  /* ---------- lienzo ---------- */
+  .lienzo{
+    position:relative;border:1px solid var(--borde);border-radius:18px;overflow:hidden;
+    background:
+      radial-gradient(circle at 50% 46%, #22252f 0%, var(--lienzo) 58%, #16181f 100%),
+      var(--lienzo);
+  }
+  .lienzo::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(var(--hilo) .5px, transparent .5px);
+    background-size:22px 22px;opacity:.18;
+  }
+  svg{display:block;width:100%;height:auto;touch-action:manipulation}
+
+  #camara{transform-origin:0 0;transition:transform 880ms cubic-bezier(.6,.02,.15,1)}
+  .grupo{transition:opacity 500ms ease}
+  .grupo.lejos{opacity:.13}
+
+  .rama{stroke:var(--hilo);stroke-width:1.1;fill:none;opacity:.55}
+  .brote{transition:opacity 400ms ease}
+
+  .nodo{cursor:pointer}
+  .nodo circle.disco{fill:var(--papel);transition:r 300ms ease}
+  .nodo:focus{outline:none}
+  .nodo:focus-visible circle.halo{stroke:var(--papel);stroke-width:2;opacity:1}
+  .halo{fill:none;opacity:0;transition:opacity 250ms ease}
+  .nodo.activo .halo{opacity:1}
+  .glifo{stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+  .rotulo{
+    font-family:var(--display);font-size:15px;letter-spacing:.3em;
+    fill:var(--papel);opacity:.5;text-anchor:middle;pointer-events:none;
+    transition:opacity 500ms ease;
+  }
+  .subrotulo{
+    font-family:var(--dato);font-size:6.5px;letter-spacing:.14em;
+    fill:var(--papel-tenue);text-anchor:middle;pointer-events:none;opacity:.75;
+  }
+  .hoja-txt{
+    font-family:var(--texto);font-size:9px;fill:var(--papel);
+    pointer-events:none;opacity:0;transition:opacity 400ms ease 200ms;
+  }
+  .grupo.abierto .hoja-txt{opacity:.9}
+
+  .nucleo-txt{font-family:var(--display);font-size:11px;letter-spacing:.34em;fill:var(--papel);text-anchor:middle;opacity:.55}
+
+  /* ---------- controles flotantes ---------- */
+  .volver{
+    position:absolute;top:12px;left:12px;display:none;align-items:center;gap:8px;
+    background:rgba(14,15,20,.82);backdrop-filter:blur(6px);
+    border:1px solid var(--borde);border-radius:999px;padding:8px 15px 8px 12px;
+    font-family:var(--dato);font-size:10px;letter-spacing:.14em;color:var(--papel);
+    cursor:pointer;
+  }
+  .volver.visible{display:flex}
+  .leyenda{
+    position:absolute;bottom:12px;left:12px;display:flex;gap:12px;
+    font-family:var(--dato);font-size:8.5px;letter-spacing:.1em;color:var(--papel-tenue);
+    background:rgba(14,15,20,.7);backdrop-filter:blur(6px);
+    border:1px solid var(--borde);border-radius:999px;padding:7px 13px;
+  }
+  .leyenda i{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+  /* ---------- panel de detalle ---------- */
+  .panel{
+    margin-top:14px;border:1px solid var(--borde);border-radius:16px;
+    padding:18px 18px 20px;background:#171921;
+  }
+  .panel .eyebrow{font-family:var(--dato);font-size:9px;letter-spacing:.2em;color:var(--papel-tenue);margin-bottom:9px}
+  .panel h2{font-family:var(--display);font-weight:400;font-size:27px;letter-spacing:.02em;margin:0 0 8px}
+  .panel p{margin:0;font-size:14px;line-height:1.6;color:#cfc9be}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+  .chip{
+    font-family:var(--dato);font-size:9.5px;letter-spacing:.1em;
+    border:1px solid var(--borde);border-radius:999px;padding:6px 11px;color:var(--papel-tenue);
+  }
+  .chip i{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .chip.clic{cursor:pointer;color:var(--papel)}
+  .chip.clic:hover{border-color:var(--papel-tenue)}
+
+  /* ---------- directorio ---------- */
+  .dir-btn{
+    width:100%;margin-top:12px;background:#171921;border:1px solid var(--borde);
+    border-radius:14px;padding:14px;color:var(--papel);font-family:var(--dato);
+    font-size:10px;letter-spacing:.22em;cursor:pointer;
+  }
+  .dir{display:none;margin-top:10px}
+  .dir.abierto{display:block}
+  .dir-eje{border-top:1px solid var(--borde);padding:14px 4px 4px}
+  .dir-eje h3{
+    font-family:var(--dato);font-size:9.5px;letter-spacing:.2em;font-weight:500;
+    margin:0 0 10px;color:var(--papel-tenue);
+  }
+  .dir-item{
+    display:flex;align-items:center;gap:10px;padding:9px 2px;cursor:pointer;
+    border-bottom:1px solid rgba(40,43,53,.5);font-size:13.5px;color:#d8d2c8;
+  }
+  .dir-item:last-child{border-bottom:none}
+  .dir-item:hover{color:var(--papel)}
+  .dir-item i{width:6px;height:6px;border-radius:50%;flex:none}
+  .dir-item em{margin-left:auto;font-family:var(--dato);font-size:9px;font-style:normal;color:var(--papel-tenue);letter-spacing:.1em}
+
+  .nota{margin:16px 4px 0;font-size:12px;line-height:1.65;color:#7d776d}
+
+  @media (prefers-reduced-motion: reduce){
+    #camara,.grupo,.hoja-txt,.rotulo{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="marca">LA <span>CONCEPT</span></div>
+    <a class="volver-tablero" href="estado_proyecto.html">← TABLERO DE AUTOMATIZACIÓN</a>
+  </div>
+  <div class="conteo" id="conteo"></div>
+</header>
+
+<div class="lienzo">
+  <button class="volver" id="volver">← TODOS LOS EJES</button>
+  <svg id="arbol" viewBox="0 0 1000 1000" role="img" aria-label="Mapa de procesos de La Concept">
+    <g id="camara"></g>
+  </svg>
+  <div class="leyenda">
+    <span><i style="background:var(--vivo)"></i>VIVO</span>
+    <span><i style="background:var(--obra)"></i>EN OBRA</span>
+    <span><i style="background:var(--plan)"></i>PROPUESTO</span>
+  </div>
+</div>
+
+<div class="panel" id="panel"></div>
+
+<button class="dir-btn" id="dirBtn">DIRECTORIO</button>
+<div class="dir" id="dir"></div>
+
+<p class="nota">
+  Los ejes y procesos de abajo son una propuesta de estructura, no un inventario confirmado.
+  Todo el contenido vive en la constante <code>EJES</code> al inicio del script: edítala y el árbol se redibuja solo.
+</p>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   1. CONTENIDO — edita solo esto
+   estado: "vivo" | "obra" | "plan"
+   ══════════════════════════════════════════════════════════════ */
+const EJES = [
+  {
+    id:"liq", nombre:"LIQUIDACIONES", sub:"consigna · marcas · comisión",
+    color:"var(--eje-liq)", glifo:"tag",
+    resumen:"El dolor real: más de 50 marcas en consignación que hoy reciben su reporte de ventas a mano, cada semana.",
+    hojas:[
+      {n:"Extraer ventas de Bsale",       e:"plan", d:"Llamada a la API de Bsale por rango de fechas. Punto de entrada de todo el pipeline."},
+      {n:"Segmentar por marca",           e:"plan", d:"Cortar el detalle de ventas usando el tag de marca del catálogo. Depende de que ese tag esté limpio."},
+      {n:"Calcular comisión",             e:"plan", d:"Aplicar el porcentaje del contrato de cada marca. Código determinista, sin modelo en el loop."},
+      {n:"Generar reporte por marca",     e:"plan", d:"Un PDF o Excel por marca, con detalle de venta, comisión y neto a pagar."},
+      {n:"Envío semanal automático",      e:"plan", d:"Corrida programada los lunes. GitHub Actions, sin servidor propio."},
+      {n:"Consulta de la marca",          e:"plan", d:"Versión 2: que la marca pregunte sus ventas sin esperar el lunes."}
+    ]
+  },
+  {
+    id:"cat", nombre:"CATÁLOGO", sub:"sku · marcas · normalización",
+    color:"var(--eje-cat)", glifo:"capas",
+    resumen:"Si la marca no está bien marcada en cada SKU, la liquidación no se puede automatizar. Esto es cimiento, no accesorio.",
+    hojas:[
+      {n:"Auditar tag de marca",     e:"obra", d:"Revisar qué porcentaje del catálogo Bsale tiene proveedor o marca asignado de forma consistente."},
+      {n:"Normalizar nombres",       e:"plan", d:"Unificar variantes del mismo nombre de marca escritas distinto."},
+      {n:"Alta de marca nueva",      e:"plan", d:"Checklist para incorporar una marca: contrato, comisión, tag, contacto de reporte."},
+      {n:"Detectar SKU huérfano",    e:"plan", d:"Alerta cuando aparece un producto vendido sin marca asignada."}
+    ]
+  },
+  {
+    id:"tie", nombre:"TIENDA", sub:"pos · stock · consigna",
+    color:"var(--eje-tie)", glifo:"percha",
+    resumen:"La operación física de la boutique. Lo que ya funciona a mano y podría dejar de doler.",
+    hojas:[
+      {n:"Cierre diario de caja",       e:"vivo", d:"Hoy se hace en Bsale. Candidato a resumen automático al cierre."},
+      {n:"Recepción en consignación",   e:"plan", d:"Registrar mercadería que entra de una marca sin comprarla."},
+      {n:"Devolución a marca",          e:"plan", d:"Lo que no se vendió y vuelve. Tiene que descontar del stock y del reporte."},
+      {n:"Alerta de quiebre",           e:"plan", d:"Avisar cuando una marca que rota se queda sin stock en sala."}
+    ]
+  },
+  {
+    id:"onl", nombre:"ONLINE", sub:"shopify · sincronía · pedidos",
+    color:"var(--eje-onl)", glifo:"globo",
+    resumen:"Canal nuevo. Conviene comprarlo hecho, no construirlo: el conector Bsale–Shopify ya existe.",
+    hojas:[
+      {n:"Sincronía Bsale ↔ Shopify", e:"plan", d:"Stock, precios y boleta. Conector de mercado, no desarrollo propio."},
+      {n:"Publicar producto",          e:"plan", d:"Ficha, fotos y categoría. El trabajo pesado es de contenido, no técnico."},
+      {n:"Seguimiento de pedido",      e:"plan", d:"Estado del envío visible para la clienta sin tener que escribir."},
+      {n:"Conciliar online vs sala",   e:"plan", d:"Que la venta web entre a la misma liquidación de la marca."}
+    ]
+  },
+  {
+    id:"fin", nombre:"FINANZAS", sub:"margen · caja · cierre",
+    color:"var(--eje-fin)", glifo:"barras",
+    resumen:"La vista que necesita la dueña, no la marca. Se alimenta de lo mismo que las liquidaciones.",
+    hojas:[
+      {n:"Margen por marca",        e:"plan", d:"Qué marca deja plata de verdad una vez descontada su comisión y el espacio que ocupa."},
+      {n:"Resultado mensual",       e:"plan", d:"Cierre simple: ingreso, comisión pagada, gasto fijo, resultado."},
+      {n:"Proyección de caja",      e:"plan", d:"Cuándo entra la plata y cuándo hay que pagarle a las marcas."},
+      {n:"Conciliación bancaria",   e:"plan", d:"Cruce entre lo que dice el banco y lo que dice Bsale."}
+    ]
+  },
+  {
+    id:"con", nombre:"CONTROL", sub:"verificadores · bitácora",
+    color:"var(--eje-con)", glifo:"check",
+    resumen:"Los agentes que revisan el trabajo de los otros. Sin esto, un reporte malo sale igual y nadie se entera.",
+    hojas:[
+      {n:"Cuadratura aritmética",   e:"plan", d:"La suma de los reportes por marca tiene que dar el total del período. Si no cuadra, no se envía."},
+      {n:"Cobertura de marcas",     e:"plan", d:"Verificar que ninguna marca activa quedó fuera de la corrida."},
+      {n:"Variación anómala",       e:"plan", d:"Marcar una marca que cae o sube fuera de rango antes de mandar el correo."},
+      {n:"Bitácora de corridas",    e:"plan", d:"Registro de qué corrió, cuándo y con qué resultado. La memoria del sistema."},
+      {n:"Fallback manual",         e:"plan", d:"Instrucciones para hacerlo a mano si el pipeline se cae un lunes."}
+    ]
+  }
+];
+
+/* ══════════════════════════════════════════════════════════════
+   2. MOTOR — layout radial, cámara y zoom
+   ══════════════════════════════════════════════════════════════ */
+const NS="http://www.w3.org/2000/svg";
+const CX=500, CY=500, R_EJE=215, R_HOJA_MIN=320, R_HOJA_MAX=430;
+const COLOR_ESTADO={vivo:"var(--vivo)",obra:"var(--obra)",plan:"var(--plan)"};
+const NOMBRE_ESTADO={vivo:"VIVO",obra:"EN OBRA",plan:"PROPUESTO"};
+
+const GLIFOS={
+  tag:'<path class="glifo" d="M-6-6h5l7 7-6 6-7-7z"/><circle class="glifo" cx="-3.2" cy="-3.2" r="1.3"/>',
+  capas:'<path class="glifo" d="M0-7l8 4-8 4-8-4z"/><path class="glifo" d="M-8 2l8 4 8-4"/>',
+  percha:'<path class="glifo" d="M0-6a2.2 2.2 0 1 1 2.2 2.2c0 1.6-2.2 1.4-2.2 3.2"/><path class="glifo" d="M0-.6L-8 5h16z"/>',
+  globo:'<circle class="glifo" cx="0" cy="0" r="7"/><path class="glifo" d="M-7 0h14M0-7c3 3.5 3 10.5 0 14M0-7c-3 3.5-3 10.5 0 14"/>',
+  barras:'<path class="glifo" d="M-6 5V-1M0 5v-9M6 5V1"/>',
+  check:'<circle class="glifo" cx="0" cy="0" r="7"/><path class="glifo" d="M-3.4 0l2.4 2.6L4-2.6"/>'
+};
+
+const camara=document.getElementById("camara");
+const svg=document.getElementById("arbol");
+const panel=document.getElementById("panel");
+const btnVolver=document.getElementById("volver");
+let ejeAbierto=null;
+
+const el=(t,a={})=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);return n;};
+
+/* --- posiciones --- */
+EJES.forEach((eje,i)=>{
+  const ang=(-90 + i*360/EJES.length)*Math.PI/180;
+  eje.ang=ang;
+  eje.x=CX+Math.cos(ang)*R_EJE;
+  eje.y=CY+Math.sin(ang)*R_EJE;
+  const n=eje.hojas.length;
+  const apertura=(300/EJES.length)*Math.PI/180;
+  eje.hojas.forEach((h,j)=>{
+    const t=n===1?0.5:j/(n-1);
+    const a=ang-apertura+t*apertura*2;
+    const r=R_HOJA_MIN+((j%2)?0:1)*(R_HOJA_MAX-R_HOJA_MIN)*0.55+(j%3)*22;
+    h.x=CX+Math.cos(a)*r;
+    h.y=CY+Math.sin(a)*r;
+    h.ang=a;
+  });
+});
+
+/* --- núcleo --- */
+const nucleo=el("g");
+nucleo.appendChild(el("circle",{cx:CX,cy:CY,r:34,fill:"none",stroke:"var(--hilo)","stroke-width":1,opacity:.5}));
+nucleo.appendChild(el("circle",{cx:CX,cy:CY,r:7,fill:"var(--papel)",opacity:.85}));
+const nt=el("text",{x:CX,y:CY+52,class:"nucleo-txt"});nt.textContent="LA CONCEPT";
+nucleo.appendChild(nt);
+camara.appendChild(nucleo);
+
+/* --- ramas y nodos --- */
+EJES.forEach(eje=>{
+  const g=el("g",{class:"grupo","data-eje":eje.id});
+
+  g.appendChild(el("line",{x1:CX,y1:CY,x2:eje.x,y2:eje.y,class:"rama","stroke-dasharray":"2 6"}));
+  eje.hojas.forEach(h=>{
+    g.appendChild(el("line",{x1:eje.x,y1:eje.y,x2:h.x,y2:h.y,class:"rama"}));
+  });
+
+  eje.hojas.forEach(h=>{
+    const nh=el("g",{class:"nodo",tabindex:"0",role:"button","aria-label":h.n});
+    nh.appendChild(el("circle",{class:"halo",cx:h.x,cy:h.y,r:16,stroke:eje.color,"stroke-width":1.5}));
+    nh.appendChild(el("circle",{class:"disco",cx:h.x,cy:h.y,r:11}));
+    nh.appendChild(el("circle",{cx:h.x,cy:h.y,r:4,fill:COLOR_ESTADO[h.e]}));
+    const izq=Math.cos(h.ang)<0;
+    const tx=el("text",{x:h.x+(izq?-18:18),y:h.y+3.5,class:"hoja-txt","text-anchor":izq?"end":"start"});
+    tx.textContent=h.n;
+    nh.appendChild(tx);
+    nh.addEventListener("click",e=>{e.stopPropagation();abrir(eje);mostrarHoja(eje,h,nh);});
+    nh.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();nh.dispatchEvent(new Event("click",{bubbles:true}));}});
+    g.appendChild(nh);
+  });
+
+  const ne=el("g",{class:"nodo",tabindex:"0",role:"button","aria-label":eje.nombre});
+  ne.appendChild(el("circle",{class:"halo",cx:eje.x,cy:eje.y,r:32,stroke:eje.color,"stroke-width":1.5}));
+  ne.appendChild(el("circle",{cx:eje.x,cy:eje.y,r:24,fill:"#181a22",stroke:eje.color,"stroke-width":1.4}));
+  const gl=el("g",{transform:`translate(${eje.x} ${eje.y})`,stroke:eje.color});
+  gl.innerHTML=GLIFOS[eje.glifo];
+  ne.appendChild(gl);
+  ne.addEventListener("click",e=>{e.stopPropagation();abrir(eje);mostrarEje(eje,ne);});
+  ne.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();ne.dispatchEvent(new Event("click",{bubbles:true}));}});
+  g.appendChild(ne);
+
+  const lr=R_EJE-70;
+  const rot=el("text",{x:CX+Math.cos(eje.ang)*lr,y:CY+Math.sin(eje.ang)*lr+4,class:"rotulo"});
+  rot.textContent=eje.nombre;
+  g.appendChild(rot);
+  const sub=el("text",{x:CX+Math.cos(eje.ang)*lr,y:CY+Math.sin(eje.ang)*lr+17,class:"subrotulo"});
+  sub.textContent=eje.sub.toUpperCase();
+  g.appendChild(sub);
+
+  eje.g=g; eje.nodo=ne;
+  camara.appendChild(g);
+});
+
+/* --- cámara --- */
+function mover(escala,cx,cy){
+  camara.style.transform=`translate(${500-cx*escala}px, ${500-cy*escala}px) scale(${escala})`;
+}
+function abrir(eje){
+  if(ejeAbierto===eje) return;
+  ejeAbierto=eje;
+  const pts=[{x:eje.x,y:eje.y},...eje.hojas,{x:CX,y:CY}];
+  const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+  const pad=150;
+  const escala=Math.min(1000/(maxX-minX+pad),1000/(maxY-minY+pad),2.4);
+  mover(escala,(minX+maxX)/2,(minY+maxY)/2);
+  EJES.forEach(e=>{
+    e.g.classList.toggle("lejos",e!==eje);
+    e.g.classList.toggle("abierto",e===eje);
+  });
+  btnVolver.classList.add("visible");
+}
+function alejar(){
+  ejeAbierto=null;
+  mover(1,CX,CY);
+  EJES.forEach(e=>{e.g.classList.remove("lejos","abierto");});
+  document.querySelectorAll(".nodo.activo").forEach(n=>n.classList.remove("activo"));
+  btnVolver.classList.remove("visible");
+  panelInicio();
+}
+btnVolver.addEventListener("click",alejar);
+svg.addEventListener("click",()=>{if(ejeAbierto)alejar();});
+
+/* --- panel --- */
+function marcar(nodo){
+  document.querySelectorAll(".nodo.activo").forEach(n=>n.classList.remove("activo"));
+  if(nodo)nodo.classList.add("activo");
+}
+function panelInicio(){
+  const total=EJES.reduce((a,e)=>a+e.hojas.length,0);
+  panel.innerHTML=`
+    <div class="eyebrow">MAPA COMPLETO</div>
+    <h2>${EJES.length} ejes, ${total} procesos</h2>
+    <p>Toca un eje para acercarte a sus procesos, o toca un proceso directamente para ver qué hace y en qué estado está.</p>
+    <div class="chips">${EJES.map(e=>
+      `<span class="chip clic" data-eje="${e.id}"><i style="background:${e.color}"></i>${e.nombre}</span>`
+    ).join("")}</div>`;
+  panel.querySelectorAll(".chip.clic").forEach(c=>{
+    c.addEventListener("click",()=>{const e=EJES.find(x=>x.id===c.dataset.eje);abrir(e);mostrarEje(e,e.nodo);});
+  });
+}
+function mostrarEje(eje,nodo){
+  marcar(nodo);
+  const cuenta=eje.hojas.reduce((a,h)=>(a[h.e]=(a[h.e]||0)+1,a),{});
+  panel.innerHTML=`
+    <div class="eyebrow" style="color:${eje.color}">EJE · ${eje.sub.toUpperCase()}</div>
+    <h2>${eje.nombre}</h2>
+    <p>${eje.resumen}</p>
+    <div class="chips">${["vivo","obra","plan"].filter(k=>cuenta[k]).map(k=>
+      `<span class="chip"><i style="background:${COLOR_ESTADO[k]}"></i>${cuenta[k]} ${NOMBRE_ESTADO[k]}</span>`
+    ).join("")}</div>`;
+}
+function mostrarHoja(eje,h,nodo){
+  marcar(nodo);
+  panel.innerHTML=`
+    <div class="eyebrow" style="color:${eje.color}">${eje.nombre}</div>
+    <h2>${h.n}</h2>
+    <p>${h.d}</p>
+    <div class="chips"><span class="chip"><i style="background:${COLOR_ESTADO[h.e]}"></i>${NOMBRE_ESTADO[h.e]}</span></div>`;
+}
+
+/* --- conteo del encabezado --- */
+(function(){
+  const todas=EJES.flatMap(e=>e.hojas);
+  const c=todas.reduce((a,h)=>(a[h.e]=(a[h.e]||0)+1,a),{});
+  document.getElementById("conteo").innerHTML=
+    `<b>${todas.length}</b> PROCESOS<br>${c.vivo||0} VIVOS · ${c.obra||0} EN OBRA · ${c.plan||0} POR CONSTRUIR`;
+})();
+
+/* --- directorio --- */
+const dir=document.getElementById("dir");
+dir.innerHTML=EJES.map(e=>`
+  <div class="dir-eje">
+    <h3 style="color:${e.color}">${e.nombre}</h3>
+    ${e.hojas.map((h,j)=>`
+      <div class="dir-item" data-eje="${e.id}" data-i="${j}">
+        <i style="background:${COLOR_ESTADO[h.e]}"></i>${h.n}<em>${NOMBRE_ESTADO[h.e]}</em>
+      </div>`).join("")}
+  </div>`).join("");
+dir.querySelectorAll(".dir-item").forEach(it=>{
+  it.addEventListener("click",()=>{
+    const e=EJES.find(x=>x.id===it.dataset.eje);
+    const h=e.hojas[+it.dataset.i];
+    abrir(e); mostrarHoja(e,h,null);
+    document.querySelector(".lienzo").scrollIntoView({behavior:"smooth",block:"center"});
+  });
+});
+document.getElementById("dirBtn").addEventListener("click",()=>dir.classList.toggle("abierto"));
+
+panelInicio();
+</script>
+</body>
+</html>
