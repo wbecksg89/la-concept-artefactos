@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="robots" content="noindex, nofollow">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LA CONCEPT · Tablero del proyecto</title>
@@ -269,7 +268,7 @@
   <div class="wrap">
     <p class="kicker">Qué se produce</p>
     <h2>Los reportes que genera el sistema</h2>
-    <p class="h2sub">Del cálculo salen tres productos, cada uno con su propósito.</p>
+    <p class="h2sub">Del cálculo salen tres productos, cada uno con su destinatario.</p>
     <div class="branch">
       <div class="bparent"><span class="bchip"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg> Motor de cálculo</span></div>
       <div class="trunk"></div>
@@ -298,6 +297,17 @@
             <li>Ranking de marcas con recomendación</li>
             <li>Rotación de stock / días de inventario</li>
             <li>P&amp;L de la tienda (arriendo+comisión − gastos)</li>
+          </ul>
+        </div>
+        <div class="rcard">
+          <div class="ric" style="background:linear-gradient(140deg,#c99a1e,#8a6a14)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <h4>Correcciones Bsale</h4>
+          <span class="tagm" style="background:#fdeccb;color:#7c5310">Para la tienda · Excel</span>
+          <p>Punch-list de productos mal etiquetados en Bsale (sin <code>product_type</code>/marca) para corregirlos en la fuente.</p>
+          <ul>
+            <li>SKU + marca sugerida + acción</li>
+            <li>Monto en juego por corrección</li>
+            <li>Cada mes: monitor de calidad de datos</li>
           </ul>
         </div>
       </div>
@@ -382,14 +392,18 @@ flowchart LR
   classDef ent fill:#eef2f9,stroke:#8593ab,stroke-width:2px,color:#243043;
   classDef sys fill:#dbe9ff,stroke:#2563eb,stroke-width:3px,color:#13294b;
   Bsale(["🛒 Bsale"]):::ent
-  Duena(["📗 Dueña · Cierre"]):::ent
+  Sheet(["📗 Google Sheet · Contratos"]):::ent
+  Contador(["🧮 Contador · Deuda"]):::ent
   Sistema["🏪 Sistema de Reportes LA CONCEPT"]:::sys
   Marcas(["🏬 Marcas"]):::ent
   Ger(["🧑‍💼 Gerencia"]):::ent
+  Tienda(["🏷️ Tienda"]):::ent
   Bsale -->|"ventas, stock, precios"| Sistema
-  Duena -->|"arriendo, comisión, deuda"| Sistema
+  Sheet -->|"comisión, arriendo"| Sistema
+  Contador -->|"deuda"| Sistema
   Sistema -->|"reporte + liquidación"| Marcas
-  Sistema -->|"dashboard de gestión"| Ger
+  Sistema -->|"dashboard gerencial"| Ger
+  Sistema -->|"correcciones Bsale (product_type)"| Tienda
 </pre>
     </div>
 
@@ -422,8 +436,8 @@ flowchart LR
   end
 
   Bsale(["🛒 Bsale API"]):::ent
-  Contratos(["📃 Contratos de marcas · offline"]):::offline
-  Cierre(["📗 Cierre mensual"]):::ent
+  Contratos(["📗 Google Sheet · Contratos"]):::ent
+  Cierre(["🧮 Cierre / Contador · deuda"]):::ent
   Gastos(["🏠 Costos fijos · incl. arriendo local"]):::ent
   Contactos(["👥 Contactos"]):::ent
 
@@ -437,7 +451,7 @@ flowchart LR
     S86["📦 86 Stock"]:::proc
     S87["🏷️ 87 Precios y costos"]:::proc
     S88["💵 88 Gastos"]:::proc
-    Ingerir["📃 89 Ingerir contratos · pendiente"]:::plan
+    Ingerir["📗 89 Sync contratos · Google Sheet"]:::proc
     Staging[("🗃️ Staging · CSV")]:::store
     Construir["🧊 80 Construir cubo"]:::proc
     Cubo[("🧱 Cubo DuckDB")]:::store
@@ -454,20 +468,22 @@ flowchart LR
     Resumen["📋 Resumen general"]:::out
     Manifest[("📇 manifest.json")]:::store
     Valida["✔️ Validar / QC"]:::proc
-    Dash["🖥️ Dashboard gestión"]:::out
+    Dash["🖥️ Dashboard gerencial"]:::out
+    Gcorr["🔍 Correcciones Bsale · calidad de datos"]:::proc
+    Corr["🧹 Reporte correcciones"]:::out
     Aprob{"✅ ¿Aprobado?"}:::gate
     Enviar["✉️ Enviar"]:::proc
   end
 
   Marcas(["🏬 Marcas"]):::ent
   Gerencia(["🧑‍💼 Gerencia"]):::ent
+  Tienda(["🏷️ Tienda"]):::ent
 
   Bsale -->|"ventas y stock"| Extraer --> Raw
   Bsale -->|"precios y costos"| S87 --> Staging
-  Contratos -->|"hoy: transcripción manual"| Cierre
   Contratos --> Ingerir
   Ingerir -->|"arriendo/comisión vigente"| Staging
-  Cierre -->|"deuda + validación"| S85 --> Staging
+  Cierre -->|"deuda"| S85 --> Staging
   Raw -->|"stock"| S86 --> Staging
   Gastos --> S88 --> Staging
   Raw --> Construir
@@ -483,6 +499,7 @@ flowchart LR
   Gmarca --> Rep --> Manifest --> Valida --> Aprob
   Gmarca --> Resumen -->|"interno"| Gerencia
   Gdash --> Dash -->|"interno"| Gerencia
+  Cubo --> Gcorr --> Corr -->|"product_type a corregir"| Tienda
   Contactos --> Enviar
   Aprob -->|"sí"| Enviar -->|"correo"| Marcas
   Tsem -.-> Extraer
